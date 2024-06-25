@@ -12,7 +12,8 @@ import { DotacionModule } from './dotacion/dotacion.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
-    DotacionModule
+    DotacionModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],
