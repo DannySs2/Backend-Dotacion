@@ -1,26 +1,100 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateDotacionDto } from './dto/create-dotacion.dto';
 import { UpdateDotacionDto } from './dto/update-dotacion.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Dotacion } from './entities/dotacion.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class DotacionService {
-  create(createDotacionDto: CreateDotacionDto) {
-    return 'This action adds a new dotacion';
+  constructor(
+    @InjectRepository(Dotacion)
+    private dotacionRepository: Repository<Dotacion>,
+  ) {}
+
+  async create(createDotacionDto: CreateDotacionDto) {
+    try {
+      const newDotacion = this.dotacionRepository.create(createDotacionDto);
+      return await this.dotacionRepository.save(newDotacion);
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error creating dotacion',
+        error.message,
+      );
+    }
   }
 
-  findAll() {
-    return `This action returns all dotacion`;
+  async findAll() {
+    try {
+      return await this.dotacionRepository.find();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error fetching dotaciones',
+        error.message,
+      );
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} dotacion`;
+  async findOne(id: number) {
+    try {
+      const dotacion = await this.dotacionRepository.findOne({
+        where: { id },
+      });
+      if (!dotacion) {
+        throw new NotFoundException(`Dotacion with ID ${id} not found`);
+      }
+      return dotacion;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error fetching dotacion',
+        error.message,
+      );
+    }
   }
 
-  update(id: number, updateDotacionDto: UpdateDotacionDto) {
-    return `This action updates a #${id} dotacion`;
+  async update(id: number, updateDotacionDto: UpdateDotacionDto) {
+    try {
+      const updateResult = await this.dotacionRepository.update(
+        id,
+        updateDotacionDto,
+      );
+      if (updateResult.affected === 0) {
+        throw new NotFoundException(`Dotacion with ID ${id} not found`);
+      }
+      return await this.findOne(id);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error updating dotacion',
+        error.message,
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} dotacion`;
+  async remove(id: number) {
+    try {
+      const deleteResult = await this.dotacionRepository.delete(id);
+      if (deleteResult.affected === 0) {
+        throw new NotFoundException(`Dotacion with ID ${id} not found`);
+      }
+      return { message: `Dotacion with ID ${id} successfully deleted` };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new InternalServerErrorException(
+        'Error deleting dotacion',
+        error.message,
+      );
+    }
   }
 }

@@ -1,7 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+} from '@nestjs/common';
 import { DotacionService } from './dotacion.service';
 import { CreateDotacionDto } from './dto/create-dotacion.dto';
 import { UpdateDotacionDto } from './dto/update-dotacion.dto';
+import { ApiTags } from '@nestjs/swagger';
+@ApiTags('dotacion')
 
 @Controller('dotacion')
 export class DotacionController {
@@ -23,7 +34,17 @@ export class DotacionController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDotacionDto: UpdateDotacionDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateDotacionDto: UpdateDotacionDto,
+  ) {
+    return this.dotacionService.update(+id, updateDotacionDto);
+  }
+  @Put(':id')
+  updatePut(
+    @Param('id') id: string,
+    @Body() updateDotacionDto: UpdateDotacionDto,
+  ) {
     return this.dotacionService.update(+id, updateDotacionDto);
   }
 
